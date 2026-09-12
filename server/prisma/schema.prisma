@@ -1,0 +1,102 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { ADMIN PM DEVELOPER }
+enum TaskStatus { TODO IN_PROGRESS IN_REVIEW DONE }
+enum Priority { LOW MEDIUM HIGH CRITICAL }
+enum NotificationType { TASK_ASSIGNED TASK_IN_REVIEW }
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  role Role
+  createdProjects Project[] @relation("ProjectManager")
+  tasks Task[] @relation("DeveloperTasks")
+  activities Activity[]
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([role])
+}
+model Client {
+  id String @id @default(cuid())
+  name String
+  email String?
+  projects Project[]
+  createdAt DateTime @default(now())
+}
+model Project {
+  id String @id @default(cuid())
+  name String
+  description String
+  clientId String
+  managerId String
+  client Client @relation(fields:[clientId],references:[id],onDelete:Restrict)
+  manager User @relation("ProjectManager",fields:[managerId],references:[id],onDelete:Restrict)
+  tasks Task[]
+  activities Activity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([managerId])
+  @@index([clientId])
+}
+model Task {
+  id String @id @default(cuid())
+  title String
+  description String
+  projectId String
+  developerId String
+  status TaskStatus @default(TODO)
+  priority Priority @default(MEDIUM)
+  dueDate DateTime
+  isOverdue Boolean @default(false)
+  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+  developer User @relation("DeveloperTasks",fields:[developerId],references:[id],onDelete:Restrict)
+  activities Activity[]
+  notifications Notification[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([projectId])
+  @@index([developerId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+}
+model Activity {
+  id String @id @default(cuid())
+  projectId String
+  taskId String
+  userId String
+  oldStatus TaskStatus
+  newStatus TaskStatus
+  createdAt DateTime @default(now())
+  project Project @relation(fields:[projectId],references:[id],onDelete:Cascade)
+  task Task @relation(fields:[taskId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Restrict)
+  @@index([projectId,createdAt])
+  @@index([taskId,createdAt])
+}
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  taskId String
+  type NotificationType
+  message String
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  task Task @relation(fields:[taskId],references:[id],onDelete:Cascade)
+  @@index([userId,read,createdAt])
+}
+model RefreshToken {
+  id String @id @default(cuid())
+  tokenHash String @unique
+  userId String
+  expiresAt DateTime
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId])
+  @@index([expiresAt])
+}

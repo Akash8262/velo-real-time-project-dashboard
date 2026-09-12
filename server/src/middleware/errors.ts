@@ -1,0 +1,1 @@
+import {Request,Response,NextFunction} from 'express'; export function errors(err:any,_req:Request,res:Response,_next:NextFunction){console.error(err);res.status(err.status||500).json({error:{code:err.code||'INTERNAL_ERROR',message:err.status?err.message:'Something went wrong'}})}
