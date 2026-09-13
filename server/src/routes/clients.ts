@@ -52,7 +52,7 @@ r.delete('/:id', roles(Role.ADMIN), async (req, res, next) => {
   try {
     await prisma.client.delete({
       where: {
-        id: req.params.id,
+        id: String(req.params.id),
       },
     });
 
