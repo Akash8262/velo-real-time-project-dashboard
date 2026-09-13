@@ -47,8 +47,8 @@ export interface Task {
 }
 
 export interface Activity {
-  fromStatus?: Status | null;
-  toStatus?: Status | null;
+  fromStatus: string | null | undefined;
+  toStatus: string | null | undefined;
   id: string;
   projectId: string;
   taskId?: string | null;

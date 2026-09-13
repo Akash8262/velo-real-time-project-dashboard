@@ -6,13 +6,7 @@ import { hashToken, signAccess, signRefresh, verifyRefresh } from '../utils/auth
 import { auth } from '../middleware/auth';
 
 const r = Router();
-const isProduction = process.env.NODE_ENV === 'production';
-const cookieOpts = {
-  httpOnly: true,
-  sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
-  secure: isProduction,
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-};
+const cookieOpts = { httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', maxAge: 7 * 24 * 60 * 60 * 1000 };
 const publicUser = (u: any) => ({ id: u.id, name: u.name, email: u.email, role: u.role });
 
 r.post('/login', async (req, res, next) => {
