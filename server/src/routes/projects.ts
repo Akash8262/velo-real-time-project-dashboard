@@ -31,7 +31,7 @@ r.get('/', async (req: any, res, next) => {
       });
 
       return res.json({
-        projects: projects.map((project) => ({
+        projects: projects.map((project: any) => ({
           ...project,
           taskCount: project.tasks.length,
           tasks: undefined,

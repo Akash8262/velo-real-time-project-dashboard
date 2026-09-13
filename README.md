@@ -115,7 +115,3 @@ Never commit `server/.env` or production secrets.
 ## Limitations
 
 Presence and the cron scheduler are process-local. The practice UI focuses on the required dashboard, projects, task, activity and notification flows rather than a full CRUD administration console.
-
-
-## Production deployment
-Backend: deploy `server/` as a persistent Node Web Service (for Socket.IO) with `npx prisma migrate deploy` before startup. Frontend: deploy `client/` to Vercel. Set `CLIENT_URL` on the backend to the Vercel URL, and set `VITE_API_URL` / `VITE_SOCKET_URL` on the frontend to the backend URL. Never commit `.env` files.

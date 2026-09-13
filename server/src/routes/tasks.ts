@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Role, TaskStatus, Priority } from '@prisma/client';
+import { Prisma, Role, TaskStatus, Priority } from '@prisma/client';
 import { auth } from '../middleware/auth';
 import { prisma } from '../utils/prisma';
 import { emitActivity, emitNotification } from '../sockets/socket';
@@ -25,7 +25,7 @@ r.patch('/:id',async(req:any,res,next)=>{try{
  if(status&&!Object.values(TaskStatus).includes(status))return res.status(400).json({error:{code:'INVALID_STATUS',message:'Invalid task status'}});
  if(priority&&!Object.values(Priority).includes(priority))return res.status(400).json({error:{code:'INVALID_PRIORITY',message:'Invalid task priority'}});
  const statusChanged=Boolean(status)&&status!==task.status;
- const updated=await prisma.$transaction(async tx=>{
+ const updated=await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
    const t=await tx.task.update({where:{id:task.id},data:{...(status?{status}:{}),...(priority?{priority}:{}),...(dueDate?{dueDate:new Date(dueDate),isOverdue:new Date(dueDate)<new Date()&& (status??task.status)!==TaskStatus.DONE}: {})},include:{developer:true,project:true}});
    if(statusChanged)await tx.activity.create({data:{projectId:task.projectId,taskId:task.id,userId:req.user.id,oldStatus:task.status,newStatus:status,message:`${req.user.name} moved ${task.title} from ${task.status} to ${status}`}});
    return t;
