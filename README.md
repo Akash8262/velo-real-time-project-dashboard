@@ -97,18 +97,37 @@ A node-cron job runs every five minutes and marks unfinished tasks whose due dat
 
 ## Deployment
 
-The included `vercel.json` builds the React client. The Express + Socket.IO API must run on a WebSocket-capable Node host. Configure the client with:
+### API (Render or another WebSocket-capable Node host)
 
-- `VITE_API_URL=https://YOUR-API/api`
-- `VITE_SOCKET_URL=https://YOUR-API`
+The API is the `server` directory. For Render, use:
 
-Configure the API with:
+- Root Directory: `server`
+- Build Command: `npm ci && npm run build`
+- Start Command: `npm start`
+- Health Check Path: `/health`
+- Pre-Deploy Command: `npx prisma migrate deploy`
+
+Set these API environment variables:
 
 - `DATABASE_URL`
 - `JWT_ACCESS_SECRET`
 - `JWT_REFRESH_SECRET`
-- `CLIENT_URL=https://YOUR-FRONTEND`
-- `PORT`
+- `CLIENT_URL=https://YOUR-FRONTEND.vercel.app`
+- `NODE_ENV=production`
+- `PORT` (provided by the host)
+
+After the database migration succeeds, run the seed once if this is a fresh demo database:
+
+```bash
+npm run seed
+```
+
+### Frontend (Vercel)
+
+Import the repository into Vercel. The repository's `vercel.json` builds the `client` directory. Set:
+
+- `VITE_API_URL=https://YOUR-API/api`
+- `VITE_SOCKET_URL=https://YOUR-API`
 
 Never commit `server/.env` or production secrets.
 
